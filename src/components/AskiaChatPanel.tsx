@@ -6,17 +6,22 @@ interface AskiaChatPanelProps {
   isOpen: boolean
   onClose: () => void
   messages: ChatMessage[]
-  onSend: (input: string) => void
+  onSend: (input: string) => Promise<void> | void
+  isSubmitting?: boolean
 }
 
-export const AskiaChatPanel = ({ isOpen, onClose, messages, onSend }: AskiaChatPanelProps) => {
+export const AskiaChatPanel = ({ isOpen, onClose, messages, onSend, isSubmitting = false }: AskiaChatPanelProps) => {
   const [input, setInput] = useState('')
 
-  const handleSubmit = (event: FormEvent) => {
+  const handleSubmit = async (event: FormEvent) => {
     event.preventDefault()
-    if (!input.trim()) return
-    onSend(input.trim())
-    setInput('')
+    const value = input.trim()
+    if (!value || isSubmitting) return
+    try {
+      await onSend(value)
+    } finally {
+      setInput('')
+    }
   }
 
   if (!isOpen) return null
@@ -46,8 +51,11 @@ export const AskiaChatPanel = ({ isOpen, onClose, messages, onSend }: AskiaChatP
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Ask a follow-up question"
+            disabled={isSubmitting}
           />
-          <button type="submit">Send</button>
+          <button type="submit" disabled={isSubmitting}>
+            {isSubmitting ? 'Sending…' : 'Send'}
+          </button>
         </form>
       </div>
     </div>

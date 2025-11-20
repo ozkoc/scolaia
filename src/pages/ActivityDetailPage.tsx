@@ -1,15 +1,57 @@
+import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { activities } from '../data/activities'
+import type { Activity } from '../types/content'
 import { TagList } from '../components/TagList'
+import { apiClient } from '../services/api'
 
 export const ActivityDetailPage = () => {
   const { activityId } = useParams()
-  const activity = activities.find((item) => item.id === activityId)
+  const [activity, setActivity] = useState<Activity | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
-  if (!activity) {
+  useEffect(() => {
+    let active = true
+    const load = async () => {
+      if (!activityId) {
+        setError('Activity ID missing in route.')
+        setLoading(false)
+        return
+      }
+      try {
+        setLoading(true)
+        const data = await apiClient.getActivity(activityId)
+        if (!active) return
+        setActivity(data)
+        setError(null)
+      } catch (err) {
+        if (!active) return
+        setError(err instanceof Error ? err.message : 'Unable to load that activity.')
+        setActivity(null)
+      } finally {
+        if (active) {
+          setLoading(false)
+        }
+      }
+    }
+    load()
+    return () => {
+      active = false
+    }
+  }, [activityId])
+
+  if (loading) {
     return (
       <div className="activity-detail">
-        <p className="empty-state">We could not find that activity.</p>
+        <p className="empty-state">Loading activity…</p>
+      </div>
+    )
+  }
+
+  if (error || !activity) {
+    return (
+      <div className="activity-detail">
+        <p className="empty-state">{error || 'We could not find that activity.'}</p>
         <Link to="/activities" className="link-button">
           Back to activities
         </Link>

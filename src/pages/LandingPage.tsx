@@ -1,9 +1,7 @@
-import { useMemo, useState } from 'react'
-import { activities } from '../data/activities'
-import { blogPosts } from '../data/blogPosts'
-import { partnerResources } from '../data/partnerResources'
-import { createAssistantMessage, createUserMessage } from '../data/chat'
-import type { ChatMessage } from '../types/content'
+import { useEffect, useMemo, useState } from 'react'
+import type { ReactNode } from 'react'
+import { createAssistantMessage, createUserMessage, defaultAssistantMessage } from '../data/chat'
+import type { Activity, BlogPost, ChatMessage, PartnerResource } from '../types/content'
 import { SearchBar } from '../components/SearchBar'
 import { Section } from '../components/Section'
 import { ActivityCard } from '../components/ActivityCard'
@@ -11,38 +9,96 @@ import { BlogCard } from '../components/BlogCard'
 import { PartnerLinkCard } from '../components/PartnerLinkCard'
 import { AskiaChatPanel } from '../components/AskiaChatPanel'
 import { filterCollection } from '../utils/search'
+import { apiClient } from '../services/api'
 
 export const LandingPage = () => {
+  const [activities, setActivities] = useState<Activity[]>([])
+  const [blogs, setBlogs] = useState<BlogPost[]>([])
+  const [partners, setPartners] = useState<PartnerResource[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [performedQuery, setPerformedQuery] = useState('')
   const [isChatOpen, setChatOpen] = useState(false)
+  const [isSendingChat, setIsSendingChat] = useState(false)
   const [messages, setMessages] = useState<ChatMessage[]>(() => [
-    createAssistantMessage("today's planning focus"),
+    createAssistantMessage(defaultAssistantMessage),
   ])
+
+  useEffect(() => {
+    let active = true
+    const load = async () => {
+      try {
+        setLoading(true)
+        const [activitiesData, blogData, partnerData] = await Promise.all([
+          apiClient.getActivities(),
+          apiClient.getBlogPosts(),
+          apiClient.getPartnerResources(),
+        ])
+        if (!active) return
+        setActivities(activitiesData)
+        setBlogs(blogData)
+        setPartners(partnerData)
+        setError(null)
+      } catch (err) {
+        if (!active) return
+        setError(err instanceof Error ? err.message : 'Unable to load content right now.')
+      } finally {
+        if (active) {
+          setLoading(false)
+        }
+      }
+    }
+    load()
+    return () => {
+      active = false
+    }
+  }, [])
 
   const filteredActivities = useMemo(
     () => filterCollection(activities, performedQuery),
-    [performedQuery],
+    [activities, performedQuery],
   )
   const filteredBlogs = useMemo(
-    () => filterCollection(blogPosts, performedQuery),
-    [performedQuery],
+    () => filterCollection(blogs, performedQuery),
+    [blogs, performedQuery],
   )
   const filteredPartners = useMemo(
-    () => filterCollection(partnerResources, performedQuery),
-    [performedQuery],
+    () => filterCollection(partners, performedQuery),
+    [partners, performedQuery],
   )
 
   const handleSearch = (value: string) => {
     setPerformedQuery(value)
   }
 
-  const handleSend = (input: string) => {
-    setMessages((prev) => [...prev, createUserMessage(input), createAssistantMessage(input)])
+  const handleSend = async (input: string) => {
+    const trimmed = input.trim()
+    if (!trimmed) return
+    setMessages((prev) => [...prev, createUserMessage(trimmed)])
+    try {
+      setIsSendingChat(true)
+      const content = await apiClient.sendChat(trimmed)
+      setMessages((prev) => [...prev, createAssistantMessage(content)])
+    } catch (err) {
+      const fallback =
+        err instanceof Error
+          ? `I ran into an issue: ${err.message}. Please try again in a moment.`
+          : 'Askia is unavailable at the moment. Please try again soon.'
+      setMessages((prev) => [...prev, createAssistantMessage(fallback)])
+    } finally {
+      setIsSendingChat(false)
+    }
   }
 
   const emptyStateMessage = performedQuery
     ? `No matches for "${performedQuery}". Try another keyword.`
     : 'Use the search bar above to focus results.'
+
+  const renderCollection = <T,>(items: T[], render: () => ReactNode) => {
+    if (loading) return <p className="empty-state">Loading curated results…</p>
+    if (error) return <p className="empty-state">{error}</p>
+    return items.length ? render() : <p className="empty-state">{emptyStateMessage}</p>
+  }
 
   return (
     <div className="landing-page">
@@ -66,39 +122,33 @@ export const LandingPage = () => {
         title="Suggested Activities"
         description="High-impact routines and projects from the Askia library."
       >
-        {filteredActivities.length ? (
+        {renderCollection(filteredActivities, () => (
           <div className="grid grid-activities">
             {filteredActivities.map((activity) => (
               <ActivityCard key={activity.id} activity={activity} />
             ))}
           </div>
-        ) : (
-          <p className="empty-state">{emptyStateMessage}</p>
-        )}
+        ))}
       </Section>
 
       <Section title="Related Blog Articles" description="Voices from our coach and teacher community.">
-        {filteredBlogs.length ? (
+        {renderCollection(filteredBlogs, () => (
           <div className="stack stack-md">
             {filteredBlogs.map((post) => (
               <BlogCard key={post.id} post={post} />
             ))}
           </div>
-        ) : (
-          <p className="empty-state">{emptyStateMessage}</p>
-        )}
+        ))}
       </Section>
 
       <Section title="Partner Resources & External Links" description="External tools we trust and reference.">
-        {filteredPartners.length ? (
+        {renderCollection(filteredPartners, () => (
           <div className="stack stack-md">
             {filteredPartners.map((resource) => (
               <PartnerLinkCard key={resource.id} resource={resource} />
             ))}
           </div>
-        ) : (
-          <p className="empty-state">{emptyStateMessage}</p>
-        )}
+        ))}
       </Section>
 
       <section className="cta-panel">
@@ -116,6 +166,7 @@ export const LandingPage = () => {
         onClose={() => setChatOpen(false)}
         messages={messages}
         onSend={handleSend}
+        isSubmitting={isSendingChat}
       />
     </div>
   )
