@@ -2,8 +2,10 @@ import 'dotenv/config'
 import express from 'express'
 import cors from 'cors'
 import { activities } from './data/activities.js'
-import { blogPosts } from './data/blogPosts.js'
+import { communityTopics } from './data/communityTopics.js'
 import { partnerResources } from './data/partnerResources.js'
+import { communityDiscussions } from './data/communityDiscussions.js'
+import { teacherProfiles } from './data/teacherProfiles.js'
 import { buildChatResponse } from './services/chat.js'
 import type { Activity, ChatRequest } from './types.js'
 
@@ -31,8 +33,21 @@ app.get(`${API_PREFIX}/activities/:id`, (req, res) => {
   res.json(activity)
 })
 
-app.get(`${API_PREFIX}/blog-posts`, (_req, res) => {
-  res.json(blogPosts)
+app.get(`${API_PREFIX}/community/topics`, (_req, res) => {
+  res.json(communityTopics)
+})
+
+app.get(`${API_PREFIX}/community/topics/:id/discussion`, (req, res) => {
+  const discussion = communityDiscussions.find((entry) => entry.topicId === req.params.id)
+  if (!discussion) {
+    res.status(404).json({ message: 'Discussion not found' })
+    return
+  }
+  res.json(discussion)
+})
+
+app.get(`${API_PREFIX}/community/profiles`, (_req, res) => {
+  res.json(teacherProfiles)
 })
 
 app.get(`${API_PREFIX}/partners`, (_req, res) => {

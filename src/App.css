@@ -199,6 +199,11 @@ button.icon-button {
   gap: 1.5rem;
 }
 
+.grid-profiles {
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.25rem;
+}
+
 .stack {
   display: flex;
   flex-direction: column;
@@ -431,6 +436,160 @@ button.icon-button {
 
 .empty-state {
   color: var(--text-muted);
+}
+
+/* Discussion panel */
+.discussion-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem;
+  z-index: 20;
+}
+
+.discussion-panel {
+  width: min(760px, 100%);
+  max-height: 92vh;
+  background: var(--surface);
+  border-radius: 24px;
+  border: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.discussion-panel__header {
+  padding: 1rem 1.5rem 0.5rem;
+  display: flex;
+  justify-content: space-between;
+  gap: 1.5rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.discussion-panel__summary {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-muted);
+}
+
+.discussion-panel__body {
+  padding: 1.5rem;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.discussion-prompt {
+  margin-top: 0.35rem;
+  color: var(--text-muted);
+}
+
+.discussion-log {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 0;
+  margin: 0;
+}
+
+.discussion-log__item {
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 1rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.discussion-log__item header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  font-size: 0.95rem;
+}
+
+.discussion-log__item header span {
+  display: block;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.discussion-log__item footer {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.discussion-log__item--askia {
+  background: var(--surface-muted);
+}
+
+.discussion-empty {
+  text-align: center;
+  color: var(--text-muted);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+/* Teacher profiles */
+.teacher-card {
+  gap: 0.75rem;
+}
+
+.teacher-card__header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.teacher-card__header img {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--surface-muted);
+}
+
+.teacher-card__header p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+.teacher-card__header span {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.teacher-card__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.teacher-card__meta ul {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  padding: 0;
+  margin: 0;
+}
+
+.teacher-card__meta li {
+  background: var(--surface-muted);
+  border-radius: 999px;
+  padding: 0.2rem 0.75rem;
 }
 
 @media (max-width: 720px) {

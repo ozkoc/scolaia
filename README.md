@@ -2,7 +2,7 @@
 
 Modern planning toolkit for teachers featuring:
 
-- **Landing search** that surfaces suggested activities, related blog posts, and partner resources
+- **Landing search** that surfaces suggested activities, community discussions, and partner resources
 - **Activities library** with filterable cards and deep-dive detail pages
 - **Ask Askia** assistant panel that mocks AI coaching responses
 - **Node + Express API** (TypeScript) that serves the same mock datasets for future integration
@@ -47,7 +47,9 @@ npm start             # run the compiled server
 - `GET /health` – uptime + status check
 - `GET /api/activities` – list all mock activities
 - `GET /api/activities/:id` – fetch a single activity
-- `GET /api/blog-posts` – blog summaries
+- `GET /api/community/topics` – community conversation starters
+- `GET /api/community/topics/:id/discussion` – thread for a specific topic
+- `GET /api/community/profiles` – educators participating in discussions
 - `GET /api/partners` – partner/external resources
 - `POST /api/chat` – `{ prompt: string }` → AI-style suggestion payload
 

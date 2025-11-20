@@ -1,4 +1,10 @@
-import type { Activity, BlogPost, PartnerResource } from '../types/content'
+import type {
+  Activity,
+  CommunityDiscussion,
+  CommunityTopic,
+  PartnerResource,
+  TeacherProfile,
+} from '../types/content'
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:4000/api'
 
@@ -24,11 +30,17 @@ export const apiClient = {
   getActivity(id: string): Promise<Activity> {
     return request(`/activities/${id}`)
   },
-  getBlogPosts(): Promise<BlogPost[]> {
-    return request('/blog-posts')
+  getCommunityTopics(): Promise<CommunityTopic[]> {
+    return request('/community/topics')
   },
   getPartnerResources(): Promise<PartnerResource[]> {
     return request('/partners')
+  },
+  getCommunityDiscussion(id: string): Promise<CommunityDiscussion> {
+    return request(`/community/topics/${id}/discussion`)
+  },
+  getTeacherProfiles(): Promise<TeacherProfile[]> {
+    return request('/community/profiles')
   },
   async sendChat(prompt: string): Promise<string> {
     const data = await request<{ content: string }>('/chat', {

@@ -15,12 +15,42 @@ export interface Activity {
   steps: string[];
 }
 
-export interface BlogPost {
+export interface CommunityTopic {
   id: string;
   title: string;
   summary: string;
   tags: Tag[];
   url: string;
+}
+
+export type DiscussionAuthorRole = 'teacher' | 'coach' | 'askia';
+
+export interface DiscussionMessage {
+  id: string;
+  authorRole: DiscussionAuthorRole;
+  authorName: string;
+  authorProfileId?: string;
+  timestamp: string;
+  content: string;
+  upvotes: number;
+}
+
+export interface TeacherProfile {
+  id: string;
+  name: string;
+  role: string;
+  school: string;
+  location: string;
+  bio: string;
+  expertise: string[];
+  avatarUrl: string;
+}
+
+export interface CommunityDiscussion {
+  topicId: string;
+  guidingPrompt: string;
+  summary: string;
+  messages: DiscussionMessage[];
 }
 
 export interface PartnerResource {

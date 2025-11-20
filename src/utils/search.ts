@@ -3,6 +3,9 @@ type Searchable = {
   summary?: string
   description?: string
   tags?: string[]
+  name?: string
+  role?: string
+  focus?: string
 }
 
 const normalize = (value: string) => value.toLowerCase().trim()
@@ -12,7 +15,15 @@ export const filterCollection = <T extends Searchable>(items: T[], query: string
   const needle = normalize(query)
   return items.filter((item) => {
     const haystack = normalize(
-      [item.title, item.summary, item.description, item.tags?.join(' ') ?? '']
+      [
+        item.title,
+        item.summary,
+        item.description,
+        item.name,
+        item.role,
+        item.focus,
+        item.tags?.join(' ') ?? '',
+      ]
         .filter(Boolean)
         .join(' '),
     )

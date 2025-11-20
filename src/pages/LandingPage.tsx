@@ -1,20 +1,30 @@
 import { useEffect, useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
 import { createAssistantMessage, createUserMessage, defaultAssistantMessage } from '../data/chat'
-import type { Activity, BlogPost, ChatMessage, PartnerResource } from '../types/content'
+import type {
+  Activity,
+  ChatMessage,
+  CommunityDiscussion,
+  CommunityTopic,
+  PartnerResource,
+  TeacherProfile,
+} from '../types/content'
 import { SearchBar } from '../components/SearchBar'
 import { Section } from '../components/Section'
 import { ActivityCard } from '../components/ActivityCard'
-import { BlogCard } from '../components/BlogCard'
+import { CommunityCard } from '../components/CommunityCard'
 import { PartnerLinkCard } from '../components/PartnerLinkCard'
 import { AskiaChatPanel } from '../components/AskiaChatPanel'
+import { CommunityDiscussionPanel } from '../components/CommunityDiscussionPanel'
+import { TeacherProfileCard } from '../components/TeacherProfileCard'
 import { filterCollection } from '../utils/search'
 import { apiClient } from '../services/api'
 
 export const LandingPage = () => {
   const [activities, setActivities] = useState<Activity[]>([])
-  const [blogs, setBlogs] = useState<BlogPost[]>([])
+  const [communityTopics, setCommunityTopics] = useState<CommunityTopic[]>([])
   const [partners, setPartners] = useState<PartnerResource[]>([])
+  const [profiles, setProfiles] = useState<TeacherProfile[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [performedQuery, setPerformedQuery] = useState('')
@@ -23,21 +33,28 @@ export const LandingPage = () => {
   const [messages, setMessages] = useState<ChatMessage[]>(() => [
     createAssistantMessage(defaultAssistantMessage),
   ])
+  const [selectedTopic, setSelectedTopic] = useState<CommunityTopic | null>(null)
+  const [discussion, setDiscussion] = useState<CommunityDiscussion | null>(null)
+  const [discussionLoading, setDiscussionLoading] = useState(false)
+  const [discussionError, setDiscussionError] = useState<string | null>(null)
+  const [discussionReloadKey, setDiscussionReloadKey] = useState(0)
 
   useEffect(() => {
     let active = true
     const load = async () => {
       try {
         setLoading(true)
-        const [activitiesData, blogData, partnerData] = await Promise.all([
+        const [activitiesData, topicData, partnerData, profileData] = await Promise.all([
           apiClient.getActivities(),
-          apiClient.getBlogPosts(),
+          apiClient.getCommunityTopics(),
           apiClient.getPartnerResources(),
+          apiClient.getTeacherProfiles(),
         ])
         if (!active) return
         setActivities(activitiesData)
-        setBlogs(blogData)
+        setCommunityTopics(topicData)
         setPartners(partnerData)
+        setProfiles(profileData)
         setError(null)
       } catch (err) {
         if (!active) return
@@ -54,17 +71,49 @@ export const LandingPage = () => {
     }
   }, [])
 
+  useEffect(() => {
+    if (!selectedTopic) return
+    let active = true
+    const loadDiscussion = async () => {
+      try {
+        setDiscussionLoading(true)
+        setDiscussionError(null)
+        setDiscussion(null)
+        const data = await apiClient.getCommunityDiscussion(selectedTopic.id)
+        if (!active) return
+        setDiscussion(data)
+      } catch (err) {
+        if (!active) return
+        setDiscussionError(
+          err instanceof Error ? err.message : 'Unable to load the discussion right now.',
+        )
+      } finally {
+        if (active) {
+          setDiscussionLoading(false)
+        }
+      }
+    }
+    loadDiscussion()
+    return () => {
+      active = false
+    }
+  }, [selectedTopic, discussionReloadKey])
+
   const filteredActivities = useMemo(
     () => filterCollection(activities, performedQuery),
     [activities, performedQuery],
   )
-  const filteredBlogs = useMemo(
-    () => filterCollection(blogs, performedQuery),
-    [blogs, performedQuery],
+  const filteredTopics = useMemo(
+    () => filterCollection(communityTopics, performedQuery),
+    [communityTopics, performedQuery],
   )
   const filteredPartners = useMemo(
     () => filterCollection(partners, performedQuery),
     [partners, performedQuery],
+  )
+  const filteredProfiles = useMemo(
+    () => filterCollection(profiles, performedQuery),
+    [profiles, performedQuery],
   )
 
   const handleSearch = (value: string) => {
@@ -88,6 +137,21 @@ export const LandingPage = () => {
     } finally {
       setIsSendingChat(false)
     }
+  }
+
+  const handleOpenDiscussion = (topic: CommunityTopic) => {
+    setSelectedTopic(topic)
+  }
+
+  const handleCloseDiscussion = () => {
+    setSelectedTopic(null)
+    setDiscussion(null)
+    setDiscussionError(null)
+  }
+
+  const handleRetryDiscussion = () => {
+    if (!selectedTopic) return
+    setDiscussionReloadKey((prev) => prev + 1)
   }
 
   const emptyStateMessage = performedQuery
@@ -131,11 +195,24 @@ export const LandingPage = () => {
         ))}
       </Section>
 
-      <Section title="Related Blog Articles" description="Voices from our coach and teacher community.">
-        {renderCollection(filteredBlogs, () => (
+      <Section title="Community Conversations" description="See how other educators are iterating in public.">
+        {renderCollection(filteredTopics, () => (
           <div className="stack stack-md">
-            {filteredBlogs.map((post) => (
-              <BlogCard key={post.id} post={post} />
+            {filteredTopics.map((topic) => (
+              <CommunityCard key={topic.id} topic={topic} onSelect={handleOpenDiscussion} />
+            ))}
+          </div>
+        ))}
+      </Section>
+
+      <Section
+        title="Community Educators"
+        description="Profiles of the coaches and teachers fueling these discussions."
+      >
+        {renderCollection(filteredProfiles, () => (
+          <div className="grid grid-profiles">
+            {filteredProfiles.map((profile) => (
+              <TeacherProfileCard key={profile.id} profile={profile} />
             ))}
           </div>
         ))}
@@ -167,6 +244,17 @@ export const LandingPage = () => {
         messages={messages}
         onSend={handleSend}
         isSubmitting={isSendingChat}
+      />
+
+      <CommunityDiscussionPanel
+        isOpen={Boolean(selectedTopic)}
+        topic={selectedTopic}
+        discussion={discussion}
+        profiles={profiles}
+        isLoading={discussionLoading}
+        error={discussionError}
+        onClose={handleCloseDiscussion}
+        onRetry={handleRetryDiscussion}
       />
     </div>
   )
