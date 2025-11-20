@@ -209,7 +209,7 @@ export const activities: Activity[] = [
     gradeBand: 'Grades 5-7',
     subject: 'ELA / Language',
     duration: '45–60 minutes',
-    imageUrl: 'https://images.unsplash.com/photo-1517244864778-5ee2fda3db50?auto=format&fit=crop&w=600&q=60',
+    imageUrl: 'https://images.unsplash.com/photo-1487611459768-bd414656ea10?auto=format&fit=crop&w=600&q=60',
     objectives: [
       'Use context clues to infer word meanings',
       'Reinforce academic vocabulary through multiple exposures',
