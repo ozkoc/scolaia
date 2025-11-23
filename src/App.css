@@ -803,23 +803,16 @@ button.icon-button {
   }
 
   .site-header nav {
-    overflow-x: auto;
-    flex-wrap: nowrap;
-    gap: 0.25rem;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-    justify-content: flex-start;
-  }
-
-  .site-header nav::-webkit-scrollbar {
-    display: none;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    justify-content: center;
   }
 
   .site-header nav a {
-    padding: 0.5rem 0.75rem;
-    font-size: 0.85rem;
+    padding: 0.5rem 0.7rem;
+    font-size: 0.8rem;
     white-space: nowrap;
-    flex-shrink: 0;
+    flex: 0 1 auto;
   }
 
   .site-main {
