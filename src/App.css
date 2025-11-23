@@ -15,16 +15,20 @@
   top: 0;
   z-index: 10;
   border-bottom: 1px solid var(--border);
+  gap: 1rem;
 }
 
 .site-logo {
   font-weight: 700;
   font-size: 1.125rem;
+  flex-shrink: 0;
 }
 
 .site-header nav {
   display: flex;
   gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
 }
 
 .site-header nav a {
@@ -33,6 +37,7 @@
   color: var(--text-muted);
   font-size: 0.9rem;
   transition: all 0.2s ease;
+  white-space: nowrap;
 }
 
 .site-header nav a:hover {
@@ -769,11 +774,24 @@ button.icon-button {
   padding: 0.2rem 0.75rem;
 }
 
+@media (max-width: 900px) {
+  .site-header {
+    padding: 0.75rem 1rem;
+  }
+
+  .site-header nav {
+    gap: 0.35rem;
+  }
+
+  .site-header nav a {
+    padding: 0.45rem 0.7rem;
+    font-size: 0.85rem;
+  }
+}
+
 @media (max-width: 720px) {
   .site-header {
     padding: 0.75rem 1rem;
-    overflow-x: auto;
-    flex-wrap: nowrap;
   }
 
   .site-header nav {
@@ -782,6 +800,7 @@ button.icon-button {
     gap: 0.25rem;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
+    max-width: calc(100vw - 8rem);
   }
 
   .site-header nav::-webkit-scrollbar {
@@ -797,7 +816,6 @@ button.icon-button {
 
   .site-logo {
     font-size: 1rem;
-    flex-shrink: 0;
   }
 
   .site-main {
