@@ -20,7 +20,7 @@ export const workShadowingPrograms: WorkShadowingProgram[] = [
     title: 'High-Impact Teaching Techniques',
     theme: 'Instructional strategies, modelling, checking for understanding, active learning',
     duration: '4–5 weeks',
-    imageUrl: '/images/High_Impact_teaching.png',
+    imageUrl: '/images/high_impact_teaching.png',
     syllabus: [
       {
         week: 'Week 0',
