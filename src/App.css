@@ -9,7 +9,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.75rem 2rem;
+  padding: 0.75rem clamp(1.25rem, 5vw, 4rem);
   background: var(--surface);
   position: sticky;
   top: 0;
@@ -19,9 +19,15 @@
 }
 
 .site-logo {
-  font-weight: 700;
-  font-size: 1.125rem;
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+}
+
+.site-logo-img {
+  height: 40px;
+  width: auto;
+  display: block;
 }
 
 .site-header nav {
@@ -798,8 +804,12 @@ button.icon-button {
   }
 
   .site-logo {
-    font-size: 1.125rem;
     text-align: center;
+    justify-content: center;
+  }
+
+  .site-logo-img {
+    height: 36px;
   }
 
   .site-header nav {

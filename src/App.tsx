@@ -16,7 +16,7 @@ const AppLayout = () => (
   <div className="app-shell">
     <header className="site-header">
       <NavLink to="/" className="site-logo">
-        <span className="brand-highlight">Scolaia</span>
+        <img src="/images/main_logo.png" alt="Scolaia" className="site-logo-img" />
       </NavLink>
       <nav>
         <NavLink to="/" end>
