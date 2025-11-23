@@ -58,6 +58,11 @@ The backend currently serves static data; hook it to a real datastore when ready
 ### Environment variables
 
 - `VITE_API_BASE_URL` – Frontend base URL for the API (defaults to `http://localhost:4000/api`). Set this when deploying so the SPA talks to the correct backend host.
+- `AWS_REGION` – Region where AWS Bedrock is enabled (e.g., `eu-central-1`).
+- `BEDROCK_MODEL_ID` – Bedrock model ID to invoke (e.g., `anthropic.claude-3-haiku-20240307-v1:0`).
+- `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` – Only required if the server is not running with an IAM role. Standard AWS credential chain is supported.
+
+If `AWS_REGION`/`BEDROCK_MODEL_ID` are missing or Bedrock returns an error, the Askia chat route automatically falls back to handcrafted strategy suggestions so local development keeps working.
 
 ## Next steps
 

@@ -1,0 +1,6 @@
+POST http://localhost:4000/api/chat
+Content-Type: application/json
+
+{
+  "prompt": "Wie kann ich KI im Englischunterricht nutzen?"
+}

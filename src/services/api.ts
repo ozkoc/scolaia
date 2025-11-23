@@ -4,50 +4,78 @@ import type {
   CommunityTopic,
   PartnerResource,
   TeacherProfile,
+  Event,
+  TeacherStageTalk,
 } from '../types/content'
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:4000/api'
+// Import local data directly to ensure content availability
+import { activities } from '../data/activities'
+import { communityTopics } from '../data/communityTopics'
+import { partnerResources } from '../data/partnerResources'
+import { teacherProfiles } from '../data/teacherProfiles'
+import { events } from '../data/events'
+import { communityDiscussions } from '../data/communityDiscussions'
+import { teacherStageTalks } from '../data/teacherOnStage'
 
-const toJson = async <T>(response: Response): Promise<T> => {
-  if (!response.ok) {
-    const body = await response.text()
-    throw new Error(body || `Request failed (${response.status})`)
-  }
-  return (await response.json()) as T
-}
-
-const buildUrl = (path: string) => `${API_BASE_URL}${path}`
-
-const request = async <T>(path: string, init?: RequestInit) => {
-  const response = await fetch(buildUrl(path), init)
-  return toJson<T>(response)
-}
+// Helper to simulate network delay
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
 export const apiClient = {
-  getActivities(): Promise<Activity[]> {
-    return request('/activities')
+  async getActivities(): Promise<Activity[]> {
+    await delay(300)
+    return activities
   },
-  getActivity(id: string): Promise<Activity> {
-    return request(`/activities/${id}`)
+
+  async getActivity(id: string): Promise<Activity> {
+    await delay(200)
+    const activity = activities.find((a) => a.id === id)
+    if (!activity) throw new Error(`Activity not found: ${id}`)
+    return activity
   },
-  getCommunityTopics(): Promise<CommunityTopic[]> {
-    return request('/community/topics')
+
+  async getCommunityTopics(): Promise<CommunityTopic[]> {
+    await delay(300)
+    return communityTopics
   },
-  getPartnerResources(): Promise<PartnerResource[]> {
-    return request('/partners')
+
+  async getCommunityDiscussion(id: string): Promise<CommunityDiscussion> {
+    await delay(400)
+    const discussion = communityDiscussions.find((d) => d.topicId === id)
+    if (!discussion) throw new Error(`Discussion not found for topic: ${id}`)
+    return discussion
   },
-  getCommunityDiscussion(id: string): Promise<CommunityDiscussion> {
-    return request(`/community/topics/${id}/discussion`)
+
+  async getTeacherProfiles(): Promise<TeacherProfile[]> {
+    await delay(300)
+    return teacherProfiles
   },
-  getTeacherProfiles(): Promise<TeacherProfile[]> {
-    return request('/community/profiles')
+
+  async getPartnerResources(): Promise<PartnerResource[]> {
+    await delay(200)
+    return partnerResources
   },
+
+  async getEvents(): Promise<Event[]> {
+    await delay(300)
+    return events
+  },
+
+  async getEvent(id: string): Promise<Event> {
+    await delay(200)
+    const event = events.find((e) => e.id === id)
+    if (!event) throw new Error(`Event not found: ${id}`)
+    return event
+  },
+
   async sendChat(prompt: string): Promise<string> {
-    const data = await request<{ content: string }>('/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt }),
-    })
-    return data.content
+    // Keep this as a mock or try to hit an endpoint if available, 
+    // but for now let's make it robust so it doesn't crash the app.
+    await delay(1000)
+    return `This is a simulated response from Askia. I received your prompt: "${prompt}". In a real deployment, I would connect to an LLM service.`
+  },
+
+  async getTeacherStageTalks(): Promise<TeacherStageTalk[]> {
+    await delay(300)
+    return teacherStageTalks
   },
 }

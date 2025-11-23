@@ -1,14 +1,15 @@
 import type { PropsWithChildren, ReactNode } from 'react'
 
 interface SectionProps extends PropsWithChildren {
-  title: string
+  title: ReactNode
   description?: ReactNode
   actions?: ReactNode
   id?: string
+  className?: string
 }
 
-export const Section = ({ title, description, actions, id, children }: SectionProps) => (
-  <section className="content-section" id={id}>
+export const Section = ({ title, description, actions, id, className, children }: SectionProps) => (
+  <section className={['content-section', className].filter(Boolean).join(' ')} id={id}>
     <header className="content-section__header">
       <div>
         <h2>{title}</h2>

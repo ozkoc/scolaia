@@ -1,0 +1,89 @@
+.partners-banner {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: clamp(2.5rem, 6vw, 3.75rem);
+    margin-bottom: 2.5rem;
+    box-shadow: 0 20px 60px rgba(15, 23, 42, 0.05);
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    cursor: pointer;
+}
+
+.partners-banner:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 25px 70px rgba(15, 23, 42, 0.1);
+}
+
+.partners-banner::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(236, 254, 255, 0.9), rgba(207, 250, 254, 0.7)),
+        url('../assets/images/partners.jpg');
+    background-size: cover;
+    background-position: center;
+    opacity: 0.9;
+    z-index: 0;
+}
+
+.partners-banner>* {
+    position: relative;
+    z-index: 1;
+}
+
+.partners-banner h1 {
+    font-size: clamp(2rem, 4vw, 3.2rem);
+    margin-bottom: 0.75rem;
+    color: #155e75;
+}
+
+.partners-banner p {
+    max-width: 52ch;
+    color: #0e7490;
+    font-size: 1.15rem;
+}
+
+.partners-banner .eyebrow {
+    color: #06b6d4;
+}
+
+.partners-section {
+    position: relative;
+    overflow: hidden;
+}
+
+.partners-section::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(236, 254, 255, 0.7), rgba(207, 250, 254, 0.5)),
+        url('../assets/images/partners.jpg');
+    background-size: 300px 300px;
+    background-repeat: repeat-y repeat-x;
+    background-position: 25% 25%;
+    z-index: 0;
+    opacity: 0.7;
+}
+
+.partners-section>* {
+    position: relative;
+    z-index: 1;
+}
+
+.partners-section h2 {
+    position: relative;
+    display: inline-block;
+    z-index: 1;
+    font-style: italic;
+    padding: 0 0.1em;
+    font-size: 2.5rem;
+    background-image: url('../assets/images/marker_green.png');
+    background-size: 115% 400%;
+    background-repeat: no-repeat;
+    background-position: center;
+}

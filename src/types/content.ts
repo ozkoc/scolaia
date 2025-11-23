@@ -67,3 +67,39 @@ export interface ChatMessage {
   content: string;
   timestamp: string;
 }
+
+export interface Event {
+  id: string
+  title: string
+  description: string
+  startTime: string // ISO string
+  endTime: string   // ISO string
+  topic: string
+  focusAreas: string[]
+  language: 'de' | 'en'
+  targetAudience: string
+  mode: 'online' | 'onsite' | 'hybrid'
+  location: string
+  host: string
+  imageUrl: string
+  registrationUrl?: string
+}
+
+export interface TeacherStageTalk {
+  id: string
+  title: string
+  description: string
+  highlight: string
+  scheduledAt: string
+  duration: string
+  mode: 'online' | 'onsite' | 'hybrid'
+  location: string
+  teacherName: string
+  teacherRole: string
+  school: string
+  tags: string[]
+  imageUrl: string
+  registrationUrl?: string
+}
+
+

@@ -6,6 +6,7 @@ type Searchable = {
   name?: string
   role?: string
   focus?: string
+  bio?: string
 }
 
 const normalize = (value: string) => value.toLowerCase().trim()
@@ -22,6 +23,7 @@ export const filterCollection = <T extends Searchable>(items: T[], query: string
         item.name,
         item.role,
         item.focus,
+        item.bio,
         item.tags?.join(' ') ?? '',
       ]
         .filter(Boolean)

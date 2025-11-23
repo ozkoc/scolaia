@@ -1,31 +1,59 @@
-import 'dotenv/config'
+import dotenv from 'dotenv'
 import express from 'express'
 import cors from 'cors'
+import { dirname, resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
+
+const currentDir = dirname(fileURLToPath(import.meta.url))
+dotenv.config({ path: resolve(currentDir, '../.env') })
+dotenv.config({ path: resolve(currentDir, '../../.env') })
+
 import { activities } from './data/activities.js'
 import { communityTopics } from './data/communityTopics.js'
 import { partnerResources } from './data/partnerResources.js'
 import { communityDiscussions } from './data/communityDiscussions.js'
 import { teacherProfiles } from './data/teacherProfiles.js'
-import { buildChatResponse } from './services/chat.js'
-import type { Activity, ChatRequest } from './types.js'
+import { events } from './data/events.js'
+import { teacherStageTalks } from './data/teacherOnStage.js'
+import { buildChatResponseAsync } from './services/chat.js'
+
+
+import type {
+  Activity,
+  ChatRequest,
+  ChatResponse,
+  CommunityDiscussion,
+  CommunityTopic,
+  PartnerResource,
+  TeacherProfile,
+  Event,
+} from './types.js'
 
 const PORT = Number(process.env.PORT) || 4000
 const API_PREFIX = process.env.API_PREFIX || '/api'
 
 const app = express()
+
 app.use(cors())
 app.use(express.json())
 
-app.get('/health', (_req, res) => {
+// Küçük helper: tüm route'lara /api prefix ekliyoruz
+const withPrefix = (path: string) => `${API_PREFIX}${path}`
+
+// Health check
+app.get(withPrefix('/health'), (_req, res) => {
   res.json({ status: 'ok', uptime: process.uptime() })
 })
 
-app.get(`${API_PREFIX}/activities`, (_req, res) => {
-  res.json(activities)
+/**
+ * ACTIVITIES
+ */
+app.get(withPrefix('/activities'), (_req, res) => {
+  res.json(activities as Activity[])
 })
 
-app.get(`${API_PREFIX}/activities/:id`, (req, res) => {
-  const activity = activities.find((item: Activity) => item.id === req.params.id)
+app.get(withPrefix('/activities/:id'), (req, res) => {
+  const activity = (activities as Activity[]).find((a) => a.id === req.params.id)
   if (!activity) {
     res.status(404).json({ message: 'Activity not found' })
     return
@@ -33,12 +61,18 @@ app.get(`${API_PREFIX}/activities/:id`, (req, res) => {
   res.json(activity)
 })
 
-app.get(`${API_PREFIX}/community/topics`, (_req, res) => {
-  res.json(communityTopics)
+/**
+ * COMMUNITY TOPICS & DISCUSSIONS
+ */
+app.get(withPrefix('/community/topics'), (_req, res) => {
+  res.json(communityTopics as CommunityTopic[])
 })
 
-app.get(`${API_PREFIX}/community/topics/:id/discussion`, (req, res) => {
-  const discussion = communityDiscussions.find((entry) => entry.topicId === req.params.id)
+app.get(withPrefix('/community/topics/:id/discussion'), (req, res) => {
+  const topicId = req.params.id
+  const discussion = (communityDiscussions as CommunityDiscussion[]).find(
+    (d) => d.topicId === topicId,
+  )
   if (!discussion) {
     res.status(404).json({ message: 'Discussion not found' })
     return
@@ -46,25 +80,65 @@ app.get(`${API_PREFIX}/community/topics/:id/discussion`, (req, res) => {
   res.json(discussion)
 })
 
-app.get(`${API_PREFIX}/community/profiles`, (_req, res) => {
-  res.json(teacherProfiles)
+/**
+ * COMMUNITY PROFILES
+ */
+app.get(withPrefix('/community/profiles'), (_req, res) => {
+  res.json(teacherProfiles as TeacherProfile[])
 })
 
-app.get(`${API_PREFIX}/partners`, (_req, res) => {
-  res.json(partnerResources)
+/**
+ * PARTNER RESOURCES
+ */
+app.get(withPrefix('/partners'), (_req, res) => {
+  res.json(partnerResources as PartnerResource[])
 })
 
-app.post(`${API_PREFIX}/chat`, (req, res) => {
-  const body = req.body as ChatRequest | undefined
-  const prompt = body?.prompt?.trim()
-  if (!prompt) {
-    res.status(400).json({ message: 'Prompt is required' })
+/**
+ * EVENTS
+ */
+app.get(withPrefix('/events'), (_req, res) => {
+  res.json(events as Event[])
+})
+
+app.get(withPrefix('/events/:id'), (req, res) => {
+  const event = (events as Event[]).find((e) => e.id === req.params.id)
+  if (!event) {
+    res.status(404).json({ message: 'Event not found' })
     return
   }
-  const result = buildChatResponse(prompt)
-  res.json(result)
+  res.json(event)
 })
 
+/**
+ * TEACHER ON STAGE TALKS
+ */
+app.get(withPrefix('/teacher-stage'), (_req, res) => {
+  res.json(teacherStageTalks)
+})
+
+/**
+ * ASK ASKIA CHAT
+ */
+app.post(withPrefix('/chat'), async (req, res) => {
+  const prompt = req.body?.prompt?.trim()
+  if (!prompt) return res.status(400).json({ message: "Prompt is required" })
+
+  try {
+    const result = await buildChatResponseAsync(prompt)
+    res.json(result)
+  } catch (e) {
+    console.error("Bedrock error:", e)
+    res.status(500).json({
+      message:
+        "Askia konnte gerade keine Antwort generieren. Bitte versuchen Sie es später erneut.",
+    })
+  }
+})
+
+/**
+ * FALLBACK 404
+ */
 app.use((req, res) => {
   res.status(404).json({ message: `Route ${req.path} not found` })
 })
