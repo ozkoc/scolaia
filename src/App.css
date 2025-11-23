@@ -53,7 +53,7 @@
 
 .site-header nav a.active {
   background: var(--surface-muted);
-  color: var(--primary-dark);
+  color: #1e3a8a;
   font-weight: 600;
 }
 
