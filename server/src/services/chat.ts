@@ -1,12 +1,12 @@
-import { BedrockRuntimeClient, InvokeModelCommand } from '@aws-sdk/client-bedrock-runtime'
-import { TextDecoder } from 'node:util'
+import { HfInference } from '@huggingface/inference'
 import type { ChatResponse } from '../types.js'
 
-const REGION = process.env.AWS_REGION || 'eu-central-1'
-const MODEL_ID = process.env.BEDROCK_MODEL_ID || 'anthropic.claude-haiku-4-5-20251001-v1:0'
-const HAS_BEDROCK_CONFIG = Boolean(process.env.AWS_REGION && process.env.BEDROCK_MODEL_ID)
-const bedrockClient = HAS_BEDROCK_CONFIG ? new BedrockRuntimeClient({ region: REGION }) : null
-const decoder = new TextDecoder('utf-8')
+// Hugging Face Configuration
+const HF_TOKEN = process.env.HF_TOKEN
+const hf = HF_TOKEN ? new HfInference(HF_TOKEN) : null
+
+// Using a multilingual model good for German and English
+const MODEL_NAME = 'mistralai/Mistral-7B-Instruct-v0.2'
 
 const FALLBACK_STRATEGIES = [
   'Starte mit einer Mini-Retrospektive: Was lief bei der letzten Stunde gut, was wollen wir verbessern? Halte die Antworten sichtbar fest.',
@@ -35,44 +35,44 @@ const buildFallbackResponse = (prompt: string): ChatResponse => {
 }
 
 export async function buildChatResponseAsync(prompt: string): Promise<ChatResponse> {
-  if (!HAS_BEDROCK_CONFIG || !bedrockClient) {
+  if (!HF_TOKEN || !hf) {
+    console.warn('HF_TOKEN not configured, using fallback responses')
     return buildFallbackResponse(prompt)
   }
 
-  const body = {
-    anthropic_version: 'bedrock-2023-05-31',
-    system:
-      "You are Askia, an AI planning assistant for teachers in Germany. Give practical, structured, classroom-ready suggestions. Always answer in the user's language (German or English).",
-    messages: [
-      {
-        role: 'user',
-        content: [{ type: 'text', text: prompt }],
-      },
-    ],
-    max_tokens: 800,
-    temperature: 0.7,
-  }
+  const systemPrompt = `You are Askia, an AI planning assistant for teachers in Germany. 
+You help teachers with lesson planning, classroom management, and educational strategies.
+Always provide practical, structured, classroom-ready suggestions.
+Respond in the same language as the user's question (German or English).
+Keep responses concise and actionable (max 300 words).`
 
-  const command = new InvokeModelCommand({
-    modelId: MODEL_ID,
-    contentType: 'application/json',
-    accept: 'application/json',
-    body: Buffer.from(JSON.stringify(body)),
-  })
+  const fullPrompt = `${systemPrompt}\n\nTeacher's question: ${prompt}\n\nYour response:`
 
   try {
-    const response = await bedrockClient.send(command)
-    const parsed = JSON.parse(decoder.decode(response.body))
-    const text = parsed?.content?.[0]?.text?.trim()
-    if (!text) {
+    const response = await hf.textGeneration({
+      model: MODEL_NAME,
+      inputs: fullPrompt,
+      parameters: {
+        max_new_tokens: 500,
+        temperature: 0.7,
+        top_p: 0.9,
+        return_full_text: false,
+      },
+    })
+
+    const text = response.generated_text?.trim()
+    
+    if (!text || text.length < 20) {
+      console.warn('HF response too short, using fallback')
       return buildFallbackResponse(prompt)
     }
+
     return {
       id: `askia-${Date.now()}`,
       content: text,
     }
   } catch (error) {
-    console.error('Bedrock invocation failed:', error)
+    console.error('Hugging Face API error:', error)
     return buildFallbackResponse(prompt)
   }
 }
