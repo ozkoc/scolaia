@@ -43,9 +43,6 @@ export const AskiaChatPanel = ({ isOpen, onClose, messages, onSend, isSubmitting
                 return part
               })
               
-              // Replace bullet points with green checkmark
-              const lineWithCheckmark = line.trim().replace(/^[-•*]\s*/, '✓ ')
-              
               return (
                 <div key={lineIdx} style={{ marginBottom: '0.5rem' }}>
                   {line.trim().match(/^[-•*]\s*/) ? (
