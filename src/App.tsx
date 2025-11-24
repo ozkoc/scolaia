@@ -34,7 +34,7 @@ const AppLayout = () => (
       <Outlet />
     </main>
     <footer className="site-footer">
-      <p>© {new Date().getFullYear()} Askia by Scolaia. Built for teacher planning labs.</p>
+      <p>© {new Date().getFullYear()} Scolaia AI. Built for teacher planning labs.</p>
     </footer>
   </div>
 )

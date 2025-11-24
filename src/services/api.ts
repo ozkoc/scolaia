@@ -67,11 +67,27 @@ export const apiClient = {
     return event
   },
 
-  async sendChat(prompt: string): Promise<string> {
-    // Keep this as a mock or try to hit an endpoint if available, 
-    // but for now let's make it robust so it doesn't crash the app.
-    await delay(1000)
-    return `This is a simulated response from Askia. I received your prompt: "${prompt}". In a real deployment, I would connect to an LLM service.`
+  async sendChat(messages: Array<{ role: 'user' | 'assistant'; content: string }>): Promise<string> {
+    try {
+      const response = await fetch('http://localhost:4000/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ messages }),
+      })
+
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status}`)
+      }
+
+      const data = await response.json()
+      return data.reply || 'No response from Scolaia AI.'
+    } catch (error) {
+      console.error('Chat API error:', error)
+      // Fallback response if backend is unavailable
+      return `I'm having trouble connecting right now. Please make sure the backend server is running on http://localhost:4000`
+    }
   },
 
   async getTeacherStageTalks(): Promise<TeacherStageTalk[]> {

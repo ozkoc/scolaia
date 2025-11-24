@@ -23,13 +23,22 @@ export const SearchBar = ({
     onSearch(value.trim())
   }
 
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = e.target.value
+    setValue(newValue)
+    // Clear the search results when input is empty
+    if (newValue.trim() === '') {
+      onSearch('')
+    }
+  }
+
   return (
     <form className={`search-bar search-bar-${size}`} onSubmit={handleSubmit}>
       {label && <label className="search-bar__label">{label}</label>}
       <div className="search-bar__field">
         <input
           value={value}
-          onChange={(e) => setValue(e.target.value)}
+          onChange={handleChange}
           placeholder={placeholder}
           aria-label={label || placeholder}
         />

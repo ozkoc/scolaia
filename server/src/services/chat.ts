@@ -1,12 +1,15 @@
-import { HfInference } from '@huggingface/inference'
+import '../config.js'
+import Groq from 'groq-sdk'
 import type { ChatResponse } from '../types.js'
 
-// Hugging Face Configuration
-const HF_TOKEN = process.env.HF_TOKEN
-const hf = HF_TOKEN ? new HfInference(HF_TOKEN) : null
+// Groq Configuration (Free tier: 30 req/min)
+const GROQ_API_KEY = process.env.GROQ_API_KEY
+const GROQ_MODEL = 'llama-3.3-70b-versatile' // Fast, multilingual, free
+const groqClient = GROQ_API_KEY ? new Groq({ apiKey: GROQ_API_KEY }) : null
 
-// Using a multilingual model good for German and English
-const MODEL_NAME = 'mistralai/Mistral-7B-Instruct-v0.2'
+// Debug logging
+console.log('🔑 GROQ_API_KEY loaded:', GROQ_API_KEY ? `Yes (${GROQ_API_KEY.substring(0, 10)}...)` : 'No')
+console.log('🤖 Groq Client initialized:', groqClient ? 'Yes' : 'No')
 
 const FALLBACK_STRATEGIES = [
   'Starte mit einer Mini-Retrospektive: Was lief bei der letzten Stunde gut, was wollen wir verbessern? Halte die Antworten sichtbar fest.',
@@ -20,59 +23,84 @@ const FALLBACK_STRATEGIES = [
 const pickStrategies = (count: number) =>
   [...FALLBACK_STRATEGIES].sort(() => Math.random() - 0.5).slice(0, count)
 
-const buildFallbackResponse = (prompt: string): ChatResponse => {
+const buildFallbackResponse = (): ChatResponse => {
   const suggestions = pickStrategies(3)
-  const content = [
-    `Danke für deinen Impuls: "${prompt || 'deine aktuelle Frage'}". Hier sind drei schnelle Ideen für deine Planung:`,
+  const reply = [
+    `Here are three quick ideas for your planning:`,
     suggestions.map((idea, index) => `${index + 1}. ${idea}`).join('\n'),
-    'Wenn du genauer beschreibst, welche Lerngruppe oder welches Fach betroffen ist, kann Askia noch präziser antworten.',
+    'If you describe more specifically which learning group or subject is affected, Scolaia AI can answer even more precisely.',
   ].join('\n\n')
 
   return {
-    id: `askia-fallback-${Date.now()}`,
-    content,
+    reply,
   }
 }
 
-export async function buildChatResponseAsync(prompt: string): Promise<ChatResponse> {
-  if (!HF_TOKEN || !hf) {
-    console.warn('HF_TOKEN not configured, using fallback responses')
-    return buildFallbackResponse(prompt)
+interface ChatMessage {
+  role: 'user' | 'assistant'
+  content: string
+}
+
+export async function buildChatResponseAsync(messages: ChatMessage[]): Promise<ChatResponse> {
+  if (!groqClient) {
+    console.log('⚠️ Groq Client not initialized, using fallback')
+    return buildFallbackResponse()
   }
-
-  const systemPrompt = `You are Askia, an AI planning assistant for teachers in Germany. 
-You help teachers with lesson planning, classroom management, and educational strategies.
-Always provide practical, structured, classroom-ready suggestions.
-Respond in the same language as the user's question (German or English).
-Keep responses concise and actionable (max 300 words).`
-
-  const fullPrompt = `${systemPrompt}\n\nTeacher's question: ${prompt}\n\nYour response:`
 
   try {
-    const response = await hf.textGeneration({
-      model: MODEL_NAME,
-      inputs: fullPrompt,
-      parameters: {
-        max_new_tokens: 500,
-        temperature: 0.7,
-        top_p: 0.9,
-        return_full_text: false,
-      },
+    const lastUserMessage = messages.filter(m => m.role === 'user').pop()?.content || ''
+    
+    // Detect language from the last user message
+    const isEnglish = /[a-z]/i.test(lastUserMessage) && !/[äöüß]/i.test(lastUserMessage) && (
+      lastUserMessage.toLowerCase().includes('how') ||
+      lastUserMessage.toLowerCase().includes('what') ||
+      lastUserMessage.toLowerCase().includes('can') ||
+      lastUserMessage.toLowerCase().includes('improve') ||
+      lastUserMessage.toLowerCase().includes('help') ||
+      lastUserMessage.toLowerCase().includes('recommend') ||
+      lastUserMessage.toLowerCase().includes('search')
+    )
+
+    console.log('🚀 Calling Groq API')
+    console.log('🌍 Detected language:', isEnglish ? 'English' : 'German')
+    
+    const languageInstruction = isEnglish 
+      ? 'IMPORTANT: The user is asking in ENGLISH. You MUST respond in ENGLISH only.' 
+      : 'WICHTIG: Der Nutzer fragt auf DEUTSCH. Du MUSST auf DEUTSCH antworten.'
+    
+    const systemPrompt = `You are Scolaia AI, an AI assistant for the Scolaia educational platform in Germany. Provide helpful, concise, and actionable recommendations.
+
+${languageInstruction}
+
+Always respond in the SAME language as the user's question. If asked in English, answer in English. If asked in German, answer in German.
+
+FORMATTING INSTRUCTIONS:
+- Use **bold** (markdown format with double asterisks) for key sentences, important concepts, or emphasized words
+- Bold the most important takeaways and action items
+- Use bold to highlight specific terms, strategies, or recommendations`
+    
+    const response = await groqClient.chat.completions.create({
+      model: GROQ_MODEL,
+      messages: [
+        { role: 'system', content: systemPrompt },
+        ...messages.map(m => ({ role: m.role, content: m.content }))
+      ],
+      max_tokens: 500,
+      temperature: 0.7,
     })
 
-    const text = response.generated_text?.trim()
-    
-    if (!text || text.length < 20) {
-      console.warn('HF response too short, using fallback')
-      return buildFallbackResponse(prompt)
+    console.log('✅ Groq API response received')
+    const text = response.choices?.[0]?.message?.content?.trim()
+    if (text) {
+      console.log('📝 Response length:', text.length)
+      return {
+        reply: text,
+      }
     }
-
-    return {
-      id: `askia-${Date.now()}`,
-      content: text,
-    }
+    console.log('⚠️ No text in response, falling back')
   } catch (error) {
-    console.error('Hugging Face API error:', error)
-    return buildFallbackResponse(prompt)
+    console.error('❌ Groq API failed:', error)
   }
+
+  return buildFallbackResponse()
 }

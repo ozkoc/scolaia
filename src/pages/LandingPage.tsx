@@ -10,6 +10,11 @@ import { AskiaChatPanel } from '../components/AskiaChatPanel'
 import { apiClient } from '../services/api'
 import { SearchResultsOverlay } from '../components/SearchResultsOverlay'
 import { buildGlobalSearchResults } from '../utils/globalSearch'
+import { activities } from '../data/activities'
+import { events } from '../data/events'
+import { communityTopics } from '../data/communityTopics'
+import { partnerResources } from '../data/partnerResources'
+import { teacherProfiles } from '../data/teacherProfiles'
 
 export const LandingPage = () => {
   const [loading, setLoading] = useState(true)
@@ -44,16 +49,22 @@ export const LandingPage = () => {
   const handleSend = async (input: string) => {
     const trimmed = input.trim()
     if (!trimmed) return
-    setMessages((prev) => [...prev, createUserMessage(trimmed)])
+    const userMessage = createUserMessage(trimmed)
+    setMessages((prev) => [...prev, userMessage])
     try {
       setIsSendingChat(true)
-      const content = await apiClient.sendChat(trimmed)
+      // Convert messages to API format
+      const apiMessages = [...messages, userMessage].map(msg => ({
+        role: msg.role,
+        content: msg.content
+      }))
+      const content = await apiClient.sendChat(apiMessages)
       setMessages((prev) => [...prev, createAssistantMessage(content)])
     } catch (err) {
       const fallback =
         err instanceof Error
           ? `I ran into an issue: ${err.message}. Please try again in a moment.`
-          : 'Askia is unavailable at the moment. Please try again soon.'
+          : 'Scolaia AI is unavailable at the moment. Please try again soon.'
       setMessages((prev) => [...prev, createAssistantMessage(fallback)])
     } finally {
       setIsSendingChat(false)
@@ -64,11 +75,11 @@ export const LandingPage = () => {
     () =>
       buildGlobalSearchResults({
         query: performedQuery,
-        events: [],
-        activities: [],
-        communityTopics: [],
-        partners: [],
-        profiles: [],
+        events: events,
+        activities: activities,
+        communityTopics: communityTopics,
+        partners: partnerResources,
+        profiles: teacherProfiles,
       }),
     [performedQuery],
   )
@@ -159,11 +170,15 @@ export const LandingPage = () => {
       <section className="cta-panel">
         <div>
           <h2>Still need inspiration?</h2>
-          <p>Loop in Askia, our planning assistant, for fresh strategies tailored to your prompt.</p>
+          <p>Loop in Scolaia AI, our planning assistant, for fresh strategies tailored to your prompt.</p>
         </div>
-        <button className="primary" onClick={() => setChatOpen(true)}>
-          Ask Askia – Ask the AI Assistant
-        </button>
+        <div className="cta-panel__action">
+          <img src="/src/assets/images/ai_char.png" alt="AI Assistant" className="cta-panel__char" />
+          <span className="cta-panel__ask">Ask</span>
+          <button className="primary" onClick={() => setChatOpen(true)}>
+            Scolaia AI
+          </button>
+        </div>
       </section>
 
       <AskiaChatPanel

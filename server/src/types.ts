@@ -32,12 +32,14 @@ export interface PartnerResource {
 }
 
 export interface ChatRequest {
-  prompt: string;
+  messages: Array<{
+    role: 'user' | 'assistant'
+    content: string
+  }>
 }
 
 export interface ChatResponse {
-  id: string;
-  content: string;
+  reply: string
 }
 
 export type DiscussionAuthorRole = 'teacher' | 'coach' | 'askia';

@@ -1,12 +1,6 @@
-import dotenv from 'dotenv'
+import './config.js'
 import express from 'express'
 import cors from 'cors'
-import { dirname, resolve } from 'node:path'
-import { fileURLToPath } from 'node:url'
-
-const currentDir = dirname(fileURLToPath(import.meta.url))
-dotenv.config({ path: resolve(currentDir, '../.env') })
-dotenv.config({ path: resolve(currentDir, '../../.env') })
 
 import { activities } from './data/activities.js'
 import { communityTopics } from './data/communityTopics.js'
@@ -121,17 +115,15 @@ app.get(withPrefix('/teacher-stage'), (_req, res) => {
  * ASK ASKIA CHAT
  */
 app.post(withPrefix('/chat'), async (req, res) => {
-  const prompt = req.body?.prompt?.trim()
-  if (!prompt) return res.status(400).json({ message: "Prompt is required" })
-
   try {
-    const result = await buildChatResponseAsync(prompt)
+    const chatRequest = req.body as ChatRequest
+    const result = await buildChatResponseAsync(chatRequest.messages)
     res.json(result)
   } catch (e) {
-    console.error("Bedrock error:", e)
+    console.error("Chat error:", e)
     res.status(500).json({
       message:
-        "Askia konnte gerade keine Antwort generieren. Bitte versuchen Sie es später erneut.",
+        "Scolaia AI konnte gerade keine Antwort generieren. Bitte versuchen Sie es später erneut.",
     })
   }
 })

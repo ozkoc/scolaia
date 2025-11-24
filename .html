@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Search Assistant</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 20px;
+      }
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+      }
+      header {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        color: white;
+        padding: 40px 30px;
+        text-align: center;
+      }
+      header h1 {
+        font-size: 2.5em;
+        margin-bottom: 10px;
+      }
+      .search-container {
+        padding: 40px 30px;
+      }
+      .search-box {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 30px;
+      }
+      #searchInput {
+        flex: 1;
+        padding: 15px 20px;
+        border: 2px solid #e1e5e9;
+        border-radius: 50px;
+        font-size: 16px;
+        outline: none;
+        transition: border-color 0.3s;
+      }
+      #searchInput:focus {
+        border-color: #4facfe;
+      }
+      #searchButton {
+        padding: 15px 30px;
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        color: white;
+        border: none;
+        border-radius: 50px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.2s;
+      }
+      #searchButton:hover {
+        transform: translateY(-2px);
+      }
+      #searchButton:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+      }
+      .loading {
+        text-align: center;
+        padding: 30px;
+      }
+      .spinner {
+        width: 40px;
+        height: 40px;
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #4facfe;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 15px;
+      }
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+      .response-container {
+        background: #f8f9fa;
+        border-radius: 15px;
+        padding: 25px;
+        margin-top: 20px;
+      }
+      .response-container h3 {
+        color: #333;
+        margin-bottom: 15px;
+        font-size: 1.2em;
+      }
+      #responseText {
+        line-height: 1.6;
+        color: #555;
+        font-size: 16px;
+        white-space: pre-wrap;
+      }
+      .error-container {
+        background: #fee;
+        border: 1px solid #fcc;
+        border-radius: 10px;
+        padding: 20px;
+        margin-top: 20px;
+        color: #c33;
+      }
+      .examples {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 20px;
+      }
+      .example-btn {
+        padding: 10px 20px;
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 25px;
+        cursor: pointer;
+        transition: all 0.3s;
+        font-size: 14px;
+      }
+      .example-btn:hover {
+        background: #e9ecef;
+        transform: translateY(-1px);
+      }
+      .hidden {
+        display: none;
+      }
+      @media (max-width: 600px) {
+        .search-box {
+          flex-direction: column;
+        }
+        .examples {
+          flex-direction: column;
+        }
+        header h1 {
+          font-size: 2em;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>🔍 AI Search Assistant</h1>
+        <p>Ask me anything and I'll help you find the information you need!</p>
+      </header>
+
+      <div class="search-container">
+        <div class="search-box">
+          <input
+            type="text"
+            id="searchInput"
+            placeholder="Ask your question here..."
+          />
+          <button id="searchButton">Search</button>
+        </div>
+
+        <div id="loadingIndicator" class="loading hidden">
+          <div class="spinner"></div>
+          <p>Thinking...</p>
+        </div>
+
+        <div id="responseContainer" class="response-container hidden">
+          <h3>AI Response:</h3>
+          <div id="responseText"></div>
+        </div>
+
+        <div id="errorContainer" class="error-container hidden">
+          <p id="errorText"></p>
+        </div>
+
+        <div class="examples">
+          <button
+            class="example-btn"
+            onclick="searchExample('What is artificial intelligence?')"
+          >
+            What is AI?
+          </button>
+          <button
+            class="example-btn"
+            onclick="searchExample('How does machine learning work?')"
+          >
+            How does ML work?
+          </button>
+          <button
+            class="example-btn"
+            onclick="searchExample('Explain cloud computing')"
+          >
+            Cloud Computing
+          </button>
+          <button class="example-btn" onclick="searchExample('What is AWS?')">
+            What is AWS?
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Your working API URL
+      const API_URL =
+        "https://wtbypz8m4j.execute-api.eu-central-1.amazonaws.com/Prod/search";
+
+      const searchInput = document.getElementById("searchInput");
+      const searchButton = document.getElementById("searchButton");
+      const loadingIndicator = document.getElementById("loadingIndicator");
+      const responseContainer = document.getElementById("responseContainer");
+      const responseText = document.getElementById("responseText");
+      const errorContainer = document.getElementById("errorContainer");
+      const errorText = document.getElementById("errorText");
+
+      searchButton.addEventListener("click", handleSearch);
+      searchInput.addEventListener("keypress", (e) => {
+        if (e.key === "Enter") handleSearch();
+      });
+
+      function searchExample(query) {
+        searchInput.value = query;
+        handleSearch();
+      }
+
+      async function handleSearch() {
+        const query = searchInput.value.trim();
+
+        if (!query) {
+          showError("Please enter a search query");
+          return;
+        }
+
+        showLoading();
+
+        try {
+          const response = await fetch(API_URL, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              query: query,
+            }),
+          });
+
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+
+          const data = await response.json();
+
+          if (data.error) {
+            throw new Error(data.error);
+          }
+
+          showResponse(data.response);
+        } catch (error) {
+          console.error("Search error:", error);
+          showError(
+            "Sorry, there was an error processing your request. Please try again."
+          );
+        }
+      }
+
+      function showLoading() {
+        hideAll();
+        loadingIndicator.classList.remove("hidden");
+        searchButton.disabled = true;
+        searchButton.textContent = "Searching...";
+      }
+
+      function showResponse(response) {
+        hideAll();
+        responseText.textContent = response;
+        responseContainer.classList.remove("hidden");
+        resetButton();
+      }
+
+      function showError(message) {
+        hideAll();
+        errorText.textContent = message;
+        errorContainer.classList.remove("hidden");
+        resetButton();
+      }
+
+      function hideAll() {
+        loadingIndicator.classList.add("hidden");
+        responseContainer.classList.add("hidden");
+        errorContainer.classList.add("hidden");
+      }
+
+      function resetButton() {
+        searchButton.disabled = false;
+        searchButton.textContent = "Search";
+      }
+    </script>
+  </body>
+</html>
