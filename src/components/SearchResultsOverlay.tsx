@@ -37,19 +37,15 @@ export const SearchResultsOverlay = ({
   useEffect(() => {
     if (isOpen && query && !isLoading && groups.length > 0) {
       setAiLoading(true)
-      fetch('http://localhost:4000/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          messages: [
-            {
-              role: 'user',
-              content: `Based on the search query "${query}", provide a brief recommendation or insight about what the user might find helpful on our educational platform. Keep it concise and actionable (3-4 sentences).`,
-            },
-          ],
-        }),
+      import('../services/api').then((apiModule) => {
+        const apiClient = apiModule.default
+        return apiClient.sendChat([
+          {
+            role: 'user',
+            content: `Based on the search query "${query}", provide a brief recommendation or insight about what the user might find helpful on our educational platform. Keep it concise and actionable (3-4 sentences).`,
+          },
+        ])
       })
-        .then((res) => res.json())
         .then((data) => {
           setAiRecommendation(data.reply || '')
         })

@@ -15,6 +15,7 @@ import { events } from '../data/events'
 import { communityTopics } from '../data/communityTopics'
 import { partnerResources } from '../data/partnerResources'
 import { teacherProfiles } from '../data/teacherProfiles'
+import aiCharImg from '../assets/images/ai_char.png'
 
 export const LandingPage = () => {
   const [loading, setLoading] = useState(true)
@@ -173,7 +174,7 @@ export const LandingPage = () => {
           <p>Loop in Scolaia AI, our planning assistant, for fresh strategies tailored to your prompt.</p>
         </div>
         <div className="cta-panel__action">
-          <img src="/src/assets/images/ai_char.png" alt="AI Assistant" className="cta-panel__char" />
+          <img src={aiCharImg} alt="AI Assistant" className="cta-panel__char" />
           <span className="cta-panel__ask">Ask</span>
           <button className="primary" onClick={() => setChatOpen(true)}>
             Scolaia AI
