@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: scolaia-api
+    runtime: node
+    region: frankfurt
+    plan: free
+    buildCommand: cd server && npm install && npm run build
+    startCommand: cd server && npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: API_PREFIX
+        value: /api
+      - key: GROQ_API_KEY
+        sync: false
