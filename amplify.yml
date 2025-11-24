@@ -11,6 +11,7 @@ frontend:
     baseDirectory: dist
     files:
       - "**/*"
+      - "assets/**/*"
   cache:
     paths:
       - .npm/**/*
