@@ -69,7 +69,8 @@ export const apiClient = {
 
   async sendChat(messages: Array<{ role: 'user' | 'assistant'; content: string }>): Promise<string> {
     try {
-      const response = await fetch('http://localhost:4000/api/chat', {
+      // Use relative path for API calls - works in both dev (proxy) and production
+      const response = await fetch('/api/chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -86,7 +87,7 @@ export const apiClient = {
     } catch (error) {
       console.error('Chat API error:', error)
       // Fallback response if backend is unavailable
-      return `I'm having trouble connecting right now. Please make sure the backend server is running on http://localhost:4000`
+      return `I'm having trouble connecting right now. Please try again in a moment.`
     }
   },
 
