@@ -20,7 +20,7 @@ export const workShadowingPrograms: WorkShadowingProgram[] = [
     title: 'High-Impact Teaching Techniques',
     theme: 'Instructional strategies, modelling, checking for understanding, active learning',
     duration: '4–5 weeks',
-    imageUrl: '/images/high_impact_teaching.png',
+    imageUrl: '/assets/images/high_impact_teaching.png',
     syllabus: [
       {
         week: 'Week 0',
@@ -94,7 +94,7 @@ export const workShadowingPrograms: WorkShadowingProgram[] = [
     title: 'Classroom Management Mastery',
     theme: 'Classroom management, routines, behavior guidance, positive culture',
     duration: '3 weeks (mixed 2–4 sessions)',
-    imageUrl: '/images/classroom_management.png',
+    imageUrl: '/assets/images/classroom_management.png',
     syllabus: [
       {
         week: 'Week 0',
@@ -155,7 +155,7 @@ export const workShadowingPrograms: WorkShadowingProgram[] = [
     title: '4-Week Best Practice Model',
     theme: 'School insights, video analysis, peer learning, and practical implementation',
     duration: '4 weeks (one live session per week)',
-    imageUrl: '/images/best_model.png',
+    imageUrl: '/assets/images/best_model.png',
     syllabus: [
       {
         week: 'Week 0',
@@ -230,7 +230,7 @@ export const workShadowingPrograms: WorkShadowingProgram[] = [
     title: 'Innovative & Creative Teaching Mindset',
     theme: 'Innovation, creative pedagogy, tech-supported learning',
     duration: '2–4 weeks',
-    imageUrl: '/images/inovative_thinking.jpg',
+    imageUrl: '/assets/images/inovative_thinking.jpg',
     syllabus: [
       {
         week: 'Week 0',
