@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import type { SearchResultGroup } from '../utils/globalSearch'
+import { apiClient } from '../services/api'
 
 interface SearchResultsOverlayProps {
   isOpen: boolean
@@ -37,17 +38,14 @@ export const SearchResultsOverlay = ({
   useEffect(() => {
     if (isOpen && query && !isLoading && groups.length > 0) {
       setAiLoading(true)
-      import('../services/api').then((apiModule) => {
-        const apiClient = apiModule.default
-        return apiClient.sendChat([
-          {
-            role: 'user',
-            content: `Based on the search query "${query}", provide a brief recommendation or insight about what the user might find helpful on our educational platform. Keep it concise and actionable (3-4 sentences).`,
-          },
-        ])
-      })
+      apiClient.sendChat([
+        {
+          role: 'user',
+          content: `Based on the search query "${query}", provide a brief recommendation or insight about what the user might find helpful on our educational platform. Keep it concise and actionable (3-4 sentences).`,
+        },
+      ])
         .then((data) => {
-          setAiRecommendation(data.reply || '')
+          setAiRecommendation(data || '')
         })
         .catch(() => {
           setAiRecommendation('Unable to generate recommendations at this time.')
