@@ -586,6 +586,73 @@ button.icon-button {
   gap: 1rem;
 }
 
+/* Events page header - styled like events-banner */
+.events-page .page-header {
+  position: relative;
+  overflow: hidden;
+  padding: 1rem clamp(2.5rem, 6vw, 3.75rem);
+}
+
+.events-page .page-header::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(239, 246, 255, 0.9), rgba(219, 234, 254, 0.7)),
+    url('/assets/images/upcoming_events.png');
+  background-size: cover;
+  background-position: center;
+  opacity: 0.9;
+  z-index: 0;
+}
+
+.events-page .page-header > * {
+  position: relative;
+  z-index: 1;
+}
+
+.events-page .page-header h1 {
+  font-size: clamp(2rem, 4vw, 3.2rem);
+  color: #1e40af;
+}
+
+.events-page .page-header p {
+  max-width: 52ch;
+  color: #1e3a8a;
+  font-size: 1.15rem;
+}
+
+/* Events page section - same background as header */
+.events-page .content-section--wide {
+  position: relative;
+  overflow: hidden;
+}
+
+.events-page .content-section--wide::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(239, 246, 255, 0.9), rgba(219, 234, 254, 0.7)),
+    url('/assets/images/upcoming_events.png');
+  background-size: cover;
+  background-position: center;
+  opacity: 0.9;
+  z-index: 0;
+}
+
+.events-page .content-section--wide > * {
+  position: relative;
+  z-index: 1;
+}
+
+.events-page .content-section--wide h2 {
+  color: #1e40af;
+}
+
+.events-page .content-section--wide p,
+.events-page .content-section--wide .content-section__description {
+  color: #1e3a8a;
+}
+
 .activities-page .search-bar {
   margin-top: 0;
 }

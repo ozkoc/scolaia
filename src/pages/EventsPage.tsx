@@ -26,12 +26,7 @@ export const EventsPage = () => {
   }, [])
 
   return (
-    <div className="page-container">
-      <header className="page-header">
-        <h1>Events</h1>
-        <p>Join digital classroom observations, seminars, and exchange formats.</p>
-      </header>
-
+    <div className="page-container events-page">
       <Section
         title="Upcoming Live Observations & Events"
         description="Participate without leaving your school."
