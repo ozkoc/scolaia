@@ -104,7 +104,9 @@ Based on this discussion, provide 2-3 alternative approaches or recommendations 
 
     return (
       <ul className="discussion-log">
-        {discussion.messages.map((message) => {
+        {discussion.messages
+          .filter((message) => message.authorRole !== 'askia')
+          .map((message) => {
           const profile = message.authorProfileId ? profileLookup[message.authorProfileId] : undefined
           return (
             <li key={message.id} className={`discussion-log__item discussion-log__item--${message.authorRole}`}>
@@ -112,7 +114,7 @@ Based on this discussion, provide 2-3 alternative approaches or recommendations 
                 <div>
                   <strong>{profile?.name ?? message.authorName}</strong>
                   <span>
-                    {profile ? `${profile.role} • ${profile.school}` : message.authorRole === 'askia' ? 'Scolaia AI Coach' : message.authorRole}
+                    {profile ? `${profile.role} • ${profile.school}` : message.authorRole}
                   </span>
                 </div>
                 <time>{new Date(message.timestamp).toLocaleString()}</time>
