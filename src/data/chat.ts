@@ -17,4 +17,4 @@ export const createAssistantMessage = (content: string): ChatMessage => buildMes
 export const createUserMessage = (content: string): ChatMessage => buildMessage('user', content)
 
 export const defaultAssistantMessage =
-  'Describe a classroom challenge and Askia will suggest a few strategies you can remix straight away.'
+  'Describe a classroom challenge and Scolaia AI will suggest a few strategies you can remix straight away.'
