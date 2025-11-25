@@ -3,8 +3,7 @@ frontend:
   phases:
     preBuild:
       commands:
-        - rm -rf node_modules
-        - npm ci
+        - npm ci --cache .npm --prefer-offline
     build:
       commands:
         - npm run build
@@ -12,3 +11,8 @@ frontend:
     baseDirectory: dist
     files:
       - "**/*"
+      - "assets/**/*"
+  cache:
+    paths:
+      - .npm/**/*
+      - node_modules/**/*
