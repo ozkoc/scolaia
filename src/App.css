@@ -909,6 +909,52 @@ button.icon-button {
   background: var(--surface-muted);
 }
 
+/* AI Learning Partner styles */
+.discussion-log__item--askia.ai-learning-partner {
+  background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
+  border: 1px solid #22c55e;
+  border-left: 4px solid #22c55e;
+  margin-top: 1.5rem;
+}
+
+.discussion-log__item--askia.ai-learning-partner header strong {
+  color: #16a34a;
+}
+
+.discussion-log__item--askia.ai-learning-partner header span {
+  color: #22c55e;
+  font-weight: 600;
+}
+
+.ai-partner-content {
+  margin-top: 0.5rem;
+}
+
+.ai-partner-content .ai-loading {
+  color: #16a34a;
+  font-style: italic;
+}
+
+.ai-partner-content .ai-intro {
+  font-weight: 600;
+  color: #15803d;
+  margin-bottom: 0.75rem;
+}
+
+.ai-partner-content .ai-suggestions {
+  line-height: 1.7;
+  color: var(--text);
+}
+
+.ai-partner-content .ai-suggestions strong {
+  color: #16a34a;
+}
+
+.ai-partner-content .ai-waiting {
+  color: var(--text-muted);
+  font-style: italic;
+}
+
 .discussion-empty {
   text-align: center;
   color: var(--text-muted);
