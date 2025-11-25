@@ -833,6 +833,21 @@ button.icon-button {
   border-bottom: 1px solid var(--border);
 }
 
+.discussion-panel__header .icon-button {
+  background: transparent;
+  border: none;
+  font-size: 1.75rem;
+  font-weight: bold;
+  color: #22c55e;
+  padding: 0;
+  cursor: pointer;
+}
+
+.discussion-panel__header .icon-button:hover {
+  color: #16a34a;
+  border: none;
+}
+
 .discussion-panel__summary {
   padding: 1rem 1.5rem;
   border-bottom: 1px solid var(--border);
